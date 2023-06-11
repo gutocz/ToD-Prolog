@@ -2,5 +2,5 @@
 :- consult('../Util/Util.pl').
 
 teste :-
-    directoryDatabase(Dir),
-    criar_pasta(Dir, 'teste').
+    getNameDatabase('teste', Name),
+    write(Name).

@@ -14,6 +14,15 @@ createUserDatabase(Username, Name, Password, Description) :-
     criar_arquivo(DirectoryUser, Usernametxt),
     escrever_em_arquivo(DirectoryUser, Usernametxt, Username, Name, Password, Description).
 
+getNameDatabase(Username, Name) :-
+    directoryDatabase(Directory),
+    concatenar_strings(Directory, Username, DirectoryUser),
+    concatenar_strings(Username, '.txt', Usernametxt),
+    concatenar_strings(DirectoryUser, '/', DirectoryUser2),
+    concatenar_strings(DirectoryUser2, Usernametxt, DirectoryUserFinal),
+    ler_user(DirectoryUserFinal, Dados),
+    write(Dados).
+
 %Funções relacionadas a login
 loginUserDatabase(Username, Password) :-
     directoryDatabase(Directory),
