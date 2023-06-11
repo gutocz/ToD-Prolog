@@ -1,7 +1,7 @@
 :- consult('../Util/Util.pl').
 
 directoryDatabase(Directory) :-
-    Directory = '../Database/LocalUsers/'.
+    Directory = 'Modules/Database/LocalUsers/'.
 
 %Funções relacionadas a Users
 createUserDatabase(Username, Name, Password, Description) :-
