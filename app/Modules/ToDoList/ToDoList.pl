@@ -1,4 +1,4 @@
-:- consult('../Database/Database.pl').
+:- consult('../Database/Database2.pl').
 
 createToDoList(Param1, Param2, Param3, Param4) :-
     createToDoListDatabase.
