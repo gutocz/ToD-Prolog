@@ -72,13 +72,19 @@ telaLogin(Login) :-
 telaPerfil(Login) :-
     write('Menu>Login>Opcoes>Perfil'), nl,
     write('1 - Exibir Perfil'), nl,
-    write('2 - Sair'), nl,
+    write('2 - Deletar Perfil'), nl,
+    write('3 - Sair'), nl,
     read(Opcao),
     (
         Opcao = 1 ->
             telaExibirPerfil(Login)
         ;
         Opcao = 2 ->
+            deleteUser(Login),
+            write('Perfil deletado com sucesso!'), nl,
+            menuInicial
+        ;
+        Opcao = 3 ->
             telaLogin(Login)
         ;
             write('Opcao Invalida!'), nl

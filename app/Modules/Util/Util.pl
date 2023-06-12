@@ -43,3 +43,22 @@ verificar_senha(Lista, Senha) :-
     converter_para_string(ElementoIndice3, ElementoConvert),
     converter_para_string(Senha, SenhaConvert),
     ElementoConvert == SenhaConvert.
+
+delete_directory(Directory) :-
+    exists_directory(Directory),    % Verifica se o diretório existe
+    delete_directory_and_contents(Directory).
+
+delete_directory(Directory) :-
+    \+ exists_directory(Directory),  % Se o diretório não existe
+    write('O diretório não existe.').
+
+delete_directory_and_contents(Directory) :-
+    forall(directory_files(Directory, File), delete_entry(Directory, File)),
+    delete_directory(Directory).
+
+delete_entry(Directory, Entry) :-
+    atomic_list_concat([Directory, '/', Entry], Path),
+    (   exists_directory(Path)
+    ->  delete_directory_and_contents(Path)
+    ;   delete_file(Path)
+    ).

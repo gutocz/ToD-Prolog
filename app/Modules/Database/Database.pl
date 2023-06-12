@@ -1,5 +1,6 @@
 :- consult('../Util/Util.pl').
 :- use_module(library(system)).
+:- use_module(library(file_systems)).
 
 
 directoryDatabase(Directory) :-
@@ -15,6 +16,11 @@ createUserDatabase(Username, Name, Password, Description) :-
     criar_pasta(DirectoryUser, 'sharedWithMe'),
     criar_arquivo(DirectoryUser, Usernametxt),
     escrever_em_arquivo(DirectoryUser, Usernametxt, Username, Name, Password, Description).
+
+deleteUserDatabase(Username) :-
+    directoryDatabase(Directory),
+    concatenar_strings(Directory, Username, DirectoryUser),
+    delete_directory(DirectoryUser).
 
 getDadosDatabase(Username, Dados) :-
     directoryDatabase(Directory),
