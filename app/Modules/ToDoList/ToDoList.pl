@@ -12,7 +12,7 @@ addUserToList(Usuario, Creator, Name) :-
 removeUserFromList(Param1, Param2, Param3) :-
     removeUserFromListDatabase.
 
-getSharedList(Param1, []) :-
+getSharedList(Username, Lists) :-
     getSharedListDatabase(Username, Lists).
 
 addTask(Param1, Param2, Param3, Param4, Param5, Param6, Param7) :-
