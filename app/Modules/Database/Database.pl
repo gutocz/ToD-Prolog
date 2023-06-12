@@ -36,20 +36,19 @@ loginUserDatabase(Username, Password) :-
 
 %Funções relacionadas a ToDoList 
 createToDoListDatabase(Username, ListName, ListDesc) :-
-    atomic_list_concat([directoryDatabase, Username, '/listas/', ListName], ListDir),
-    atomic_list_concat([ListDir, '/', '0', ListName, '.txt'], FilePath),
-    \+ exists_directory(ListDir), % Verifica se o diretório não existe
-    make_directory(ListDir),
+    directoryDatabase(Directory),
+    atomic_list_concat([Directory, '/', Username, '/listas/'], ListDir),
+    atomic_list_concat([ListDir, '/', ListName, '.txt'], FilePath),
     open(FilePath, write, Stream),
     format(Stream, "~w~n", [ListDesc]),
     format(Stream, "~w~n", [ListName]),
     close(Stream).
 
-deleteToDoListDatabase(Username, ListName) :-
+deleteToDoListDatabase(Username, Name) :-
     atomic_list_concat([directoryDatabase, Username, '/listas/', ListName], DirectoryPath),
     delete_directory(DirectoryPath).
 
-addUserToListDatabase(Username, Creator, ListName) :-
+addUserToListDatabase(Usuario, Creator, Name) :-
     atomic_list_concat([directoryDatabase, Username, '/sharedWithMe'], ListDir),
     atomic_list_concat([ListDir, '/', ListName], UserList),
     exists_directory(ListDir),

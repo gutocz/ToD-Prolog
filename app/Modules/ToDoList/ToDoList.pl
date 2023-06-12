@@ -1,13 +1,13 @@
-:- consult('../Database/Database2.pl').
+:- consult('../Database/Database.pl').
 
-createToDoList(Param1, Param2, Param3, Param4) :-
-    createToDoListDatabase.
+createToDoList(Username, NomeLista, DescricaoLista) :-
+    createToDoListDatabase(Username, NomeLista, DescricaoLista).
 
-deleteToDoList(Param1, Param2, Param3) :-
-    deleteToDoListDatabase.
+deleteToDoList(Username, Name) :-
+    deleteToDoListDatabase(Username, Name).
 
-addUserToList(Param1, Param2, Param3, Param4) :- 
-    addUserToListDatabase.
+addUserToList(Usuario, Creator, Name) :- 
+    addUserToListDatabase(Usuario, Creator, Name).
 
 removeUserFromList(Param1, Param2, Param3) :-
     removeUserFromListDatabase.
