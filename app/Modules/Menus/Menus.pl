@@ -1,6 +1,7 @@
 :- consult('../Users/Users.pl').
 :- consult('../Util/Util.pl').
 :- consult('../ToDoList/ToDoList.pl').
+:- consult('../Database/Database.pl').
 
 menuInicial :-
     write('ToD - Sua agenda pessoal'), nl,
@@ -22,7 +23,7 @@ menuInicial :-
     ).
 
 login :-
-    write('Login: '), nl,
+    write('Username: '), nl,
     read(Login),
     write('Senha: '), nl,
     read(Senha),
@@ -31,9 +32,10 @@ login :-
             write('Login realizado com sucesso!'), nl,
             telaLogin(Login)
         ;
-            write('Login ou senha incorretos!'), nl,
+            write('Senha incorreta!'), nl,
             login
     ).
+
 
 telaCadastro :-
     write('Nome: '), nl,
@@ -44,7 +46,7 @@ telaCadastro :-
     read(Senha),
     write('Descrição: '), nl,
     read(Descricao),
-    createUser(Nome, Username, Senha, Descricao),
+    createUser(Username, Name, Senha, Descricao),
     write('Usuário cadastrado com sucesso!'), nl,
     menuInicial.
 
