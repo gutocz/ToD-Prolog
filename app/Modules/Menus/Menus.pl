@@ -179,7 +179,7 @@ select_folder(Number, Files) :-
     directory_exists(FolderName),
     write('Você escolheu a pasta: '), write(FolderName), nl,
     % Chame a função desejada aqui
-    my_function(FolderName).
+    telaAcessoLista(Login, Login, FolderName).
 
 % Função exemplo para ser executada
 my_function(FolderName) :-
@@ -187,13 +187,119 @@ my_function(FolderName) :-
 
 %===========================================================================
 
-telaCadastroListas(Login) :-
+telaCadastroListas(Username) :-
     write('Menu>Login>Opcoes>Listas>Criar Lista'), nl,
     write(''), nl,
     write('Nome da Lista: '), nl,
     read(NomeLista),
     write('Descrição da Lista: '), nl,
     read(DescricaoLista),
-    createToDoList(Login, NomeLista, DescricaoLista),
+    createToDoList(Username, NomeLista, DescricaoLista),
     write('Lista criada com sucesso!'), nl,
-    telaListas(Login).
+    telaListas(Username).
+
+telaAcessoLista(Username, Creator, Name) :-
+    write('Menu>Login>Opcoes>Listas>Tarefas'),
+    write(''), nl,
+    write('1- Adicionar Tarefa'), nl,
+    write('2- Listar Tarefas'), nl,
+    write('3- Compartilhar Lista'), nl,
+    write('4- Deletar Lista'), nl,
+    write('5- Sair'), nl,
+    read(Opcao),
+    (
+        Opcao = 1 ->
+            telaAdicionarTarefa(Username, Creator, Name)
+        ;
+        Opcao = 2 ->
+            telaListarTarefas(Username, Creator, Name)
+        ;
+        Opcao = 3 ->
+            write('Digite o nome do usuario que deseja compartilhar a lista: '), nl,
+            read(Usuario),
+            addUserToList(Usuario, Creator, Name),
+            telaAcessoLista(Username, Creator, Name)
+        ;
+        Opcao = 4 ->
+            write('Tem certeza que deseja deletar a lista? (S/N)'), nl,
+            read(Resposta),
+            (
+                Resposta = 'S' ->
+                    deleteToDoList(Username, Name),
+                    telaListas(Username)
+                ;
+                Resposta = 'N' ->
+                    telaAcessoLista(Username, Creator, Name)
+                ;
+                    write('Opcao Invalida!'), nl,
+                    telaAcessoLista(Username, Creator, Name)
+            )
+        ;
+        Opcao = 5 ->
+            telaListas(Username)
+        ;
+            write('Opcao Invalida!'), nl,
+            telaAcessoLista(Username, Creator, Name)
+    ).
+
+telaListarTarefas(Username, Creator, Name) :-
+    directoryDatabase(Directory),
+    concatenar_strings(Directory, Creator, DirectoryCreator),
+    concatenar_strings(DirectoryCreator, '/', DirectoryCreatorBarra),
+    concatenar_strings(DirectoryCreatorBarra, 'listas', DirectoryListas),
+    concatenar_strings(DirectoryListas, '/', DirectoryListasBarra),
+    concatenar_strings(DirectoryListasBarra, Name, DirectoryLista),
+    write('Menu>Login>Opcoes>Listas>Tarefas>Listar Tarefas'), nl,
+    write(''), nl,
+    write('Tarefas:'), nl,
+    listar_arquivos(DirectoryLista, Username, Creator, Name).
+% Parte que lista as tarefas
+% ===========================================================================================
+% Predicado principal para listar arquivos com extensão diferente de ".txt"
+listar_arquivos(Pasta, Username, Creator, Name) :-
+    directory_files(Pasta, Arquivos),
+    filtrar_arquivos(Arquivos, Pasta, -1, ArquivosFiltrados),
+    choose_folder(ArquivosFiltrados, Pasta).
+
+% Predicado auxiliar para filtrar arquivos com extensão diferente de ".txt"
+filtrar_arquivos([], _, _, []).
+filtrar_arquivos([Arquivo|Outros], Pasta, Numero, [Arquivo|FiltradosResto]) :-
+    Arquivo \= '.',
+    Arquivo \= '..',
+    atomic_list_concat([Pasta, '/', Arquivo], Caminho),
+    \+ file_name_extension(_, 'txt', Caminho),
+    write(Numero), write(': '), writeln(Arquivo),
+    NovoNumero is Numero + 1,
+    filtrar_arquivos(Outros, Pasta, NovoNumero, FiltradosResto).
+filtrar_arquivos([_|Outros], Pasta, Numero, Filtrados) :-
+    NovoNumero is Numero + 1,
+    filtrar_arquivos(Outros, Pasta, NovoNumero, Filtrados).
+
+% Predicado para escolher uma pasta pelo número
+choose_folder(Files, Pasta) :-
+    write('Escolha o número da pasta (ou 0 para sair): '),
+    read(Number),
+    process_choice(Number, Files, Pasta).
+
+% Predicado para processar a escolha do usuário
+process_choice(0, _, _) :- telaListarTarefas(Username, Creator, Name).
+process_choice(Number, Files, Pasta) :-
+    number(Number),
+    nth1(Number, Files, Arquivo),
+    select_folder(Arquivo, Pasta).
+
+process_choice(_, Files, Pasta) :-
+    write('Opção inválida. Tente novamente.'), nl,
+    fail. % Retorna ao início do repeat para que o usuário insira uma opção válida
+
+% Predicado para selecionar uma pasta pelo nome e executar uma função
+select_folder(Folder, Pasta) :-
+    \+ member(Folder, ['.', '..']), % Ignorar as pastas "." e ".."
+    atomic_list_concat([Pasta, '/', Folder], PastaSelecionada),
+    exists_directory(PastaSelecionada),
+    write('Você escolheu a pasta: '), write(PastaSelecionada), nl,
+    % Chame a função desejada aqui
+    telaAcessoTarefa(Username, Creator, Name, PastaSelecionada).
+% ===========================================================================================
+
+
