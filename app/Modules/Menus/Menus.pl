@@ -139,6 +139,19 @@ telaListasPerfil(Login) :-
     repeat,
     choose_folder(Files, Login),
     halt.
+    
+telaListasCompartilhadas(Login) :-
+    directoryDatabase(Directory),
+    atomic_list_concat([Directory, Login, '/sharedWithMe/'], DirectoryShared),
+     write('Menu>Login>Opcoes>Listas>ListasCompartilhadas'), nl,
+    write(''), nl,
+    write('Listas Compartilhadas Comigo'), nl,
+    getSharedList(Login, Lists),
+    write('0. Sair'), nl,
+    listasNumeradas(Listas, ListasNumeradas),
+    printListasNumeradas(ListasNumeradas),
+    readOption(Option),
+    handleListasCompartilhadasOption(Option, Username, Listas).
 
 %Funções auxiliares pra listar listas
 %==================================================
@@ -303,5 +316,32 @@ select_folder(Folder, Pasta) :-
     % Chame a função desejada aqui
     telaAcessoTarefa(Username, Creator, Name, PastaSelecionada).
 % ===========================================================================================
+% Funções auxiliares listas Compartilhadas
 
+listasNumeradas(Listas, ListasNumeradas) :-
+    listasNumeradas(Listas, 1, ListasNumeradas).
+
+listasNumeradas([], _, []).
+listasNumeradas([Lista|Listas], Index, [(Index, Lista)|ListasNumeradas]) :-
+    NextIndex is Index + 1,
+    listasNumeradas(Listas, NextIndex, ListasNumeradas).
+
+printListasNumeradas([]).
+printListasNumeradas([(Index, Lista)|Listas]) :-
+    write(Index), write('. '), write(Lista), nl,
+    printListasNumeradas(Listas).
+
+readOption(Option) :-
+    read_line_to_string(user_input, Option).
+
+handleListasCompartilhadasOption("0", _, _) :-
+    telaListas(Username).
+handleListasCompartilhadasOption(Option, Username, Listas) :-
+    number_string(Index, Option),
+    nth1(Index, Listas, ListName),
+    atomic_list_concat([directoryDatabase, Username, '/sharedWithMe/', ListName], FilePath),
+    read_file_to_string(FilePath, FileContent, []),
+    split_string(FileContent, "\n", "", Lines),
+    nth1(1, Lines, Creator),
+    telaAcessoLista(Username, Creator, ListName).
 
