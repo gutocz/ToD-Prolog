@@ -76,7 +76,8 @@ removeUserFromListDatabase(Username, ListName) :-
     close(Stream).
 
 getSharedListDatabase(Username, Lists) :-
-    atomic_list_concat([directoryDatabase, Username, '/sharedWithMe'], FilePath),
+    directoryDatabase(Directory),
+    atomic_list_concat([Directory, Username, '/sharedWithMe'], FilePath),
     exists_directory(FilePath),
     directory_files(FilePath, Contents),
     exclude(=(.), Contents, Lists).
