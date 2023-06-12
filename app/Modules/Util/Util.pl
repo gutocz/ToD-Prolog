@@ -1,4 +1,5 @@
 :- use_module(library(filesex)).
+:- use_module(library(files)).
 
 criar_pasta(Diretorio, NomePasta) :-
     atomic_list_concat([Diretorio, '/', NomePasta], Caminho),
