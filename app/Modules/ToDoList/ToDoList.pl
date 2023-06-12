@@ -13,7 +13,7 @@ removeUserFromList(Param1, Param2, Param3) :-
     removeUserFromListDatabase.
 
 getSharedList(Param1, []) :-
-    getSharedListDatabase.
+    getSharedListDatabase(Username, Lists).
 
 addTask(Param1, Param2, Param3, Param4, Param5, Param6, Param7) :-
     addTaskDatabase.
