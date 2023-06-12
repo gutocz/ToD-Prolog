@@ -37,8 +37,10 @@ loginUserDatabase(Username, Password) :-
 %Funções relacionadas a ToDoList 
 createToDoListDatabase(Username, ListName, ListDesc) :-
     directoryDatabase(Directory),
-    atomic_list_concat([Directory, '/', Username, '/listas/'], ListDir),
+    atomic_list_concat([Directory, '/', Username, '/listas/', ListName], ListDir),
     atomic_list_concat([ListDir, '/', ListName, '.txt'], FilePath),
+\+ exists_directory(ListDir), % Verifica se o diretório não existe
+    make_directory_path(ListDir), % Cria o diretório e seus pais, se necessário
     open(FilePath, write, Stream),
     format(Stream, "~w~n", [ListDesc]),
     format(Stream, "~w~n", [ListName]),
