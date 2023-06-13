@@ -140,11 +140,7 @@ telaListasPerfil(Login) :-
     write('Menu>Login>Opcoes>Listas>Minhas Listas'), nl,
     write(''), nl,
     write('Minhas Listas:'), nl,
-    directory_files(DirectoryListas, Files),
-    print_folder_names(Files),
-    repeat,
-    choose_folder(Files, Login),
-    halt.
+    list_folders(DirectoryListas, Login, Login).
     
 telaListasCompartilhadas(Login) :-
     directoryDatabase(Directory),
@@ -161,51 +157,40 @@ telaListasCompartilhadas(Login) :-
 
 %Funções auxiliares pra listar listas
 %==================================================
-% Predicado para imprimir os nomes das pastas
-print_folder_names(Files) :-
-    print_folder_names(Files, 1).
+list_folders(Directory, Username, Username) :-
+    directory_files(Directory, Files),
+    exclude(hidden_file, Files, Folders),
+    print_folder_names(Folders, 1),
+    choose_folder(Folders, Username, Username).
 
 print_folder_names([], _).
-print_folder_names([File|Rest], N) :-
-    atom_concat(N, '- ', NumberPrefix),
-    atom_concat(NumberPrefix, File, FolderName),
-    write(FolderName), nl,
+print_folder_names([Folder|Rest], N) :-
+    \+ special_folder(Folder), % Verifica se a pasta é "." ou ".."
+    format('~d - ~w~n', [N, Folder]),
     NextN is N + 1,
     print_folder_names(Rest, NextN).
 
-% Predicado para escolher uma pasta pelo número
-choose_folder(Files, Login) :-
+print_folder_names([_|Rest], N) :-
+    NextN is N + 1,
+    print_folder_names(Rest, NextN).
+
+choose_folder(Folders, Username, Username) :-
     write('Escolha o número da pasta (ou 0 para sair): '),
     read(Number),
-    process_choice(Number, Files, Login).
+    process_choice(Number, Folders, Username, Username).
 
-% Predicado para processar a escolha do usuário
-process_choice(0, _, Login) :- !, telaListas(Login).
-process_choice(Number, Files, Login) :-
+process_choice(0, _, _, _) :- telaListas(Username).
+process_choice(Number, Folders, Username, Username) :-
     number(Number),
-    select_folder(Number, Files),
-    nl.
+    nth1(Number, Folders, Folder),
+    format('Você escolheu a pasta: ~w~n', [Folder]),
+    telaAcessoLista(Username, Username, Folder).
 
-process_choice(_, Files, Login) :-
-    write('Opção inválida. Tente novamente.'), nl,
-    fail. % Retorna ao início do repeat para que o usuário insira uma opção válida
-
-% Predicado para selecionar uma pasta pelo número e executar uma função
-select_folder(Number, Files) :-
-    length(Files, NumFolders),
-    Number > 0,
-    Number =< NumFolders,
-    nth1(Number, Files, Folder),
-    atom_concat('listas/', FolderName, Folder),
-    directory_exists(FolderName),
-    write('Você escolheu a pasta: '), write(FolderName), nl,
-    % Chame a função desejada aqui
-    telaAcessoLista(Login, Login, FolderName).
-
-% Função exemplo para ser executada
-my_function(FolderName) :-
-    write('Executando função com a pasta: '), write(FolderName), nl.
-
+hidden_file(File) :-
+    sub_atom(File, 0, 1, _, '.').
+    
+special_folder('.').
+special_folder('..').
 %===========================================================================
 
 telaCadastroListas(Username) :-
