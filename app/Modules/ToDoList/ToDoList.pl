@@ -15,8 +15,8 @@ removeUserFromList(Param1, Param2, Param3) :-
 getSharedList(Username, Lists) :-
     getSharedListDatabase(Username, Lists).
 
-addTask(Param1, Param2, Param3, Param4, Param5, Param6, Param7) :-
-    addTaskDatabase.
+addTask(Param1, Param2, Param3, Param4, Param5, Param6) :-
+    addTaskDatabase(Param1, Param2, Param3, Param4, Param5, Param6).
 
 showTaskContent(Param1, Param2, Param3, []) :- 
     showTaskContentDatabase.

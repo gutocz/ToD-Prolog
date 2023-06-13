@@ -72,19 +72,14 @@ telaLogin(Login) :-
 telaPerfil(Login) :-
     write('Menu>Login>Opcoes>Perfil'), nl,
     write('1 - Exibir Perfil'), nl,
-    write('2 - Deletar Perfil'), nl,
-    write('3 - Sair'), nl,
+    %write('2 - Deletar Perfil'), nl,
+    write('2 - Sair'), nl,
     read(Opcao),
     (
         Opcao = 1 ->
             telaExibirPerfil(Login)
         ;
         Opcao = 2 ->
-            deleteUser(Login),
-            write('Perfil deletado com sucesso!'), nl,
-            menuInicial
-        ;
-        Opcao = 3 ->
             telaLogin(Login)
         ;
             write('Opcao Invalida!'), nl
@@ -258,54 +253,44 @@ telaListarTarefas(Username, Creator, Name) :-
     write('Menu>Login>Opcoes>Listas>Tarefas>Listar Tarefas'), nl,
     write(''), nl,
     write('Tarefas:'), nl,
-    listar_arquivos(DirectoryLista, Username, Creator, Name).
+    listar_pastas(DirectoryLista, Username, Creator, Name).
 % Parte que lista as tarefas
 % ===========================================================================================
 % Predicado principal para listar arquivos com extensão diferente de ".txt"
-listar_arquivos(Pasta, Username, Creator, Name) :-
-    directory_files(Pasta, Arquivos),
-    filtrar_arquivos(Arquivos, Pasta, -1, ArquivosFiltrados),
-    choose_folder(ArquivosFiltrados, Pasta).
+listar_pastas(Directory, Username, Creator, Name) :-
+    directory_files(Directory, Files),
+    exclude(hidden_file, Files, Folders),
+    print_folder(Folders, 1),
+    escolher_pastas(Folders, Username, Creator, Name).
 
-% Predicado auxiliar para filtrar arquivos com extensão diferente de ".txt"
-filtrar_arquivos([], _, _, []).
-filtrar_arquivos([Arquivo|Outros], Pasta, Numero, [Arquivo|FiltradosResto]) :-
-    Arquivo \= '.',
-    Arquivo \= '..',
-    atomic_list_concat([Pasta, '/', Arquivo], Caminho),
-    \+ file_name_extension(_, 'txt', Caminho),
-    write(Numero), write(': '), writeln(Arquivo),
-    NovoNumero is Numero + 1,
-    filtrar_arquivos(Outros, Pasta, NovoNumero, FiltradosResto).
-filtrar_arquivos([_|Outros], Pasta, Numero, Filtrados) :-
-    NovoNumero is Numero + 1,
-    filtrar_arquivos(Outros, Pasta, NovoNumero, Filtrados).
+print_folder([], _).
+print_folder([Folder|Rest], N) :-
+    \+ special_folder(Folder), % Verifica se a pasta é "." ou ".."
+    format('~d - ~w~n', [N, Folder]),
+    NextN is N + 1,
+    print_folder_names(Rest, NextN).
 
-% Predicado para escolher uma pasta pelo número
-choose_folder(Files, Pasta) :-
+print_folder([_|Rest], N) :-
+    NextN is N + 1,
+    print_folder_names(Rest, NextN).
+
+escolher_pastas(Folders, Username, Creator, Name) :-
     write('Escolha o número da pasta (ou 0 para sair): '),
     read(Number),
-    process_choice(Number, Files, Pasta).
+    processar_escolha(Number, Folders, Username, Creator, Name).
 
-% Predicado para processar a escolha do usuário
-process_choice(0, _, _) :- telaListarTarefas(Username, Creator, Name).
-process_choice(Number, Files, Pasta) :-
+processar_escolha(0, _, _, _, _) :- telaAcessoLista(Username, Creator, Name).
+processar_escolha(Number, Folders, Username, Creator, Name) :-
     number(Number),
-    nth1(Number, Files, Arquivo),
-    select_folder(Arquivo, Pasta).
+    nth1(Number, Folders, Folder),
+    format('Você escolheu a pasta: ~w~n', [Folder]),
+    telaAcessoTarefa(Username, Username, Folder).
 
-process_choice(_, Files, Pasta) :-
-    write('Opção inválida. Tente novamente.'), nl,
-    fail. % Retorna ao início do repeat para que o usuário insira uma opção válida
-
-% Predicado para selecionar uma pasta pelo nome e executar uma função
-select_folder(Folder, Pasta) :-
-    \+ member(Folder, ['.', '..']), % Ignorar as pastas "." e ".."
-    atomic_list_concat([Pasta, '/', Folder], PastaSelecionada),
-    exists_directory(PastaSelecionada),
-    write('Você escolheu a pasta: '), write(PastaSelecionada), nl,
-    % Chame a função desejada aqui
-    telaAcessoTarefa(Username, Creator, Name, PastaSelecionada).
+hidden_file(File) :-
+    sub_atom(File, 0, 1, _, '.').
+    
+special_folder('.').
+special_folder('..').
 % ===========================================================================================
 % Funções auxiliares listas Compartilhadas
 
@@ -336,3 +321,17 @@ handleListasCompartilhadasOption(Option, Username, Listas) :-
     nth1(1, Lines, Creator),
     telaAcessoLista(Username, Creator, ListName).
 
+telaAdicionarTarefa(Username, Creator, Name) :-
+    write('Menu>Login>Opcoes>Listas>Tarefas>Adicionar Tarefa'), nl,
+    write(''), nl,
+    write('Nome da Tarefa: '), nl,
+    read(NomeTarefa),
+    write('Descrição da Tarefa: '), nl,
+    read(DescricaoTarefa),
+    write('Pra qual dia você quer adicionar essa tarefa? (dd/mm/aaaa)'),
+    read(Data),
+    write('Qual a prioridade dessa tarefa? (1 - 5)'),
+    read(Prioridade),
+    addTask(Username, Name, NomeTarefa, DescricaoTarefa, Data, Prioridade),
+    write('Tarefa criada com sucesso!'), nl,
+    telaAcessoLista(Username, Creator, Name).

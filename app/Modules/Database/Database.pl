@@ -89,10 +89,12 @@ getSharedListDatabase(Username, Lists) :-
     exclude(=(.), Contents, Lists).
 
 addTaskDatabase(Username, ListName, TaskName, TaskDesc, TaskDate, TaskPriority) :-
-    atomic_list_concat([directoryDatabase, Username, '/listas/', ListName, '/', TaskName], FilePath),
-    open(FilePath, write, Stream),
-    format(Stream, "~w~n~w~n~w~n", [TaskName, TaskDesc, TaskDate, TaskPriority]),
-    close(Stream).
+    directoryDatabase(Directory),
+    concatenar_strings(Directory, Username, DirectoryUser),
+    concatenar_strings(DirectoryUser, '/listas/', DirectoryList),
+    concatenar_strings(DirectoryList, ListName, DirectoryListName),
+    criar_arquivo(DirectoryListName, TaskName),
+    escrever_em_arquivo(DirectoryListName, TaskName, TaskDesc, TaskDate, TaskPriority, 'bolo').
 
 showTaskContentDatabase(Username, ListName, TaskName, Content) :-
     atomic_list_concat([directoryDatabase, Username, '/listas/', ListName, '/', TaskName], FilePath),
